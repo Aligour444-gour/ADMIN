@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENITH Key Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary-blue: #1976D2;
+            --primary-dark-blue: #0D47A1;
+            --primary-light-blue: #E3F2FD;
+            --secondary-blue: #2196F3;
+            --accent-blue: #82B1FF;
+            --white: #FFFFFF;
+            --light-gray: #F5F7FA;
+            --medium-gray: #E0E0E0;
+            --dark-gray: #546E7A;
+            --text-dark: #263238;
+            --text-light: #78909C;
+            --success: #4CAF50;
+            --error: #F44336;
+            --warning: #FF9800;
+            --border-radius: 12px;
+            --card-shadow: 0 8px 24px rgba(25, 118, 210, 0.12);
+            --button-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+            --transition: all 0.3s ease;
+            --drawer-width: 280px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary-light-blue) 0%, var(--white) 100%);
+            color: var(--text-dark);
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .generator-container {
+            width: 90%;
+            max-width: 800px;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .generator-header {
+            padding: 30px 30px 20px;
+            background: linear-gradient(45deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--white);
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 12px;
+            color: var(--white);
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .generator-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .tagline {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-toggle {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 24px;
+            cursor: pointer;
+            display: none;
+            z-index: 100;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: var(--drawer-width);
+            height: 100%;
+            background-color: var(--white);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: var(--transition);
+            padding-top: 60px;
+            overflow-y: auto;
+        }
+
+        .drawer.open {
+            left: 0;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { left: -300px; }
+            to { left: 0; }
+        }
+
+        .drawer-tabs {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--white);
+        }
+
+        .drawer-tab {
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-light);
+            text-align: left;
+            display: flex;
+            align-items: center;
+            border-left: 4px solid transparent;
+        }
+
+        .drawer-tab i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .drawer-tab.active {
+            color: var(--primary-blue);
+            font-weight: 600;
+            background-color: var(--primary-light-blue);
+            border-left-color: var(--primary-blue);
+        }
+
+        .drawer-tab:hover {
+            background-color: var(--light-gray);
+        }
+
+        .close-drawer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .tab-content {
+            padding: 30px;
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 16px 20px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            background-color: var(--light-gray);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+        }
+
+        .device-options {
+            display: none;
+            margin-top: 10px;
+            padding: 15px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .device-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .device-option:last-child {
+            margin-bottom: 0;
+        }
+
+        .device-option input {
+            margin-right: 10px;
+            width: auto;
+        }
+
+        .device-option label {
+            margin-bottom: 0;
+            font-weight: normal;
+        }
+
+        .main-button, .button {
+            padding: 16px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            background: linear-gradient(45deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--white);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            box-shadow: var(--button-shadow);
+            text-decoration: none;
+            display: inline-block;
+            line-height: 1;
+        }
+
+        .main-button:hover, .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(25, 118, 210, 0.4);
+        }
+
+        .button.secondary {
+            background: var(--white);
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-blue);
+            box-shadow: none;
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+
+        .button.secondary:hover {
+            background: var(--primary-light-blue);
+        }
+
+        .button.danger {
+            background: var(--white);
+            color: var(--error);
+            border: 1px solid var(--error);
+            box-shadow: none;
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+
+        .button.danger:hover {
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            text-align: left;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-header {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .key-display {
+            background-color: var(--white);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-family: monospace;
+            font-size: 16px;
+            word-break: break-all;
+            margin-bottom: 15px;
+            border: 1px solid var(--medium-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        .key-text {
+            flex: 1;
+        }
+
+        .key-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .copy-button {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .copy-button:hover {
+            background: var(--primary-dark-blue);
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-top: 15px;
+            display: none;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .error {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+
+        .history-table th {
+            background-color: var(--light-gray);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .history-table tr {
+            transition: var(--transition);
+        }
+
+        .history-table tr:hover {
+            background-color: var(--light-gray);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--error);
+        }
+
+        .status-expired {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-button {
+            padding: 8px 16px;
+            background: var(--white);
+            border: 1px solid var(--medium-gray);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .filter-button.active {
+            background: var(--primary-blue);
+            color: var(--white);
+            border-color: var(--primary-blue);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-light);
+        }
+
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            color: var(--medium-gray);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .generator-container {
+                width: 95%;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+            
+            .drawer-tab {
+                padding: 14px 20px;
+                font-size: 15px;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+            
+            .history-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .key-display {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .key-actions {
+                align-self: flex-end;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.4s ease;
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .shake {
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="generator-container">
+            <div class="generator-header">
+                <div class="logo">
+                    <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1 15h2v2h-2v-2zm-1-4.83a2 2 0 011.85-2.09c.8-.08 1.48.51 1.63 1.3.16.8.02 1.6-.32 2.3-.34.7-.76 1.34-1.25 1.94-.49.6-.96 1.18-1.4 1.76l-.01.01h.01c-.6.8-1.57 1.3-2.67 1.3-1.4 0-2.52-1.12-2.52-2.5 0-.9.46-1.7 1.2-2.18.73-.48 1.62-.68 2.5-.59zM12 4a8 8 0 018 8c0 4.418-3.582 8-8 8S4 16.418 4 12 7.582 4 12 4zm-1 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                    </svg>
+                    <div class="logo-text">ZENITH ADMIN</div>
+                </div>
+                <h1></h1>
+                <p class="tagline"></p>
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <!-- Drawer for mobile navigation -->
+            <div class="drawer" id="drawer">
+                <button class="close-drawer" id="closeDrawer">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="drawer-tabs">
+                    <button class="drawer-tab active" data-tab="create">
+                        <i class="fas fa-key"></i>Create Keys
+                    </button>
+                    <button class="drawer-tab" data-tab="manage">
+                        <i class="fas fa-cog"></i>Manage Keys
+                    </button>
+                    <button class="drawer-tab" data-tab="history">
+                        <i class="fas fa-history"></i>Key History
+                    </button>
+                </div>
+            </div>
+            
+            <div class="tab-content">
+                <!-- Create Keys Tab -->
+                <div class="tab-pane active" id="create-tab">
+                    <form id="keyForm">
+                        <div class="form-group">
+                            <label for="duration">License Duration</label>
+                            <select id="duration" required>
+                                <option value="1">1 Day</option>
+                                <option value="7">7 Days</option>
+                                <option value="30" selected>30 Days</option>
+                                <option value="90">90 Days</option>
+                                <option value="365">365 Days</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="deviceId">Device ID (Optional - for binding)</label>
+                            <input type="text" id="deviceId" placeholder="Leave empty for multi-device use">
+                            <div class="device-options" id="deviceOptions">
+                                <div class="device-option">
+                                    <input type="radio" id="option2" name="deviceOption" value="2">
+                                    <label for="option2">2 Devices</label>
+                                </div>
+                                <div class="device-option">
+                                    <input type="radio" id="option3" name="deviceOption" value="3">
+                                    <label for="option3">3 Devices</label>
+                                </div>
+                                <div class="device-option">
+                                    <input type="radio" id="option5" name="deviceOption" value="5">
+                                    <label for="option5">5 Devices</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="keyCount">Number of Keys to Generate</label>
+                            <input type="number" id="keyCount" value="1" min="1" max="10" required>
+                        </div>
+                        
+                        <button type="submit" class="main-button" id="generateButton">
+                            <i class="fas fa-key"></i> Generate Keys
+                        </button>
+                    </form>
+                    
+                    <div class="result-container" id="resultContainer">
+                        <div class="result-header">Generated Keys:</div>
+                        <div id="keyList"></div>
+                        <button class="copy-button" id="copyAllButton">
+                            <i class="fas fa-copy"></i> Copy All Keys
+                        </button>
+                        <div id="message" class="message"></div>
+                    </div>
+                </div>
+                
+                <!-- Manage Keys Tab -->
+                <div class="tab-pane" id="manage-tab">
+                    <div class="search-box">
+                        <input type="text" id="searchKey" placeholder="Search by key or device ID...">
+                        <button class="button" id="searchButton">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    
+                    <div class="filter-options">
+                        <button class="filter-button active" data-status="all">All Keys</button>
+                        <button class="filter-button" data-status="active">Active Only</button>
+                        <button class="filter-button" data-status="inactive">Disabled Only</button>
+                        <button class="filter-button" data-status="expired">Expired Only</button>
+                    </div>
+                    
+                    <div id="keysTableContainer">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Status</th>
+                                    <th>Expiry Date</th>
+                                    <th>Device ID</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keysTableBody">
+                                <!-- Keys will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="noKeysMessage" class="empty-state" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                        <p>No keys found. Generate some keys first.</p>
+                    </div>
+                </div>
+                
+                <!-- History Tab -->
+                <div class="tab-pane" id="history-tab">
+                    <div class="search-box">
+                        <input type="text" id="historySearch" placeholder="Search history...">
+                        <button class="button" id="historySearchButton">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    
+                    <div class="filter-options">
+                        <button class="filter-button active" data-history="all">All Activities</button>
+                        <button class="filter-button" data-history="created">Key Creation</button>
+                        <button class="filter-button" data-history="disabled">Key Disabling</button>
+                        <button class="filter-button" data-history="enabled">Key Enabling</button>
+                    </div>
+                    
+                    <div id="historyTableContainer">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Activity</th>
+                                    <th>Key</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <!-- History will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="noHistoryMessage" class="empty-state" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p>No activity history yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
+        import { getDatabase, ref, set, update, onValue, off, get, query, orderByChild, equalTo } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js';
+
+        // Initialize Firebase with the provided configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyACm2KBFC7p-7X6cLSeQGgcFwWj8ELu6j8",
+            authDomain: "backdoor-3da3d.firebaseapp.com",
+            databaseURL: "https://backdoor-3da3d-default-rtdb.firebaseio.com",
+            projectId: "backdoor-3da3d",
+            storageBucket: "backdoor-3da3d.firebasestorage.app",
+            messagingSenderId: "296618804855",
+            appId: "1:296618804855:android:7df6b32fcc6cf1178ce872"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const accessKeysRef = ref(db, 'accessKeys');
+        const historyRef = ref(db, 'keyHistory');
+
+        // UI Elements
+        const menuToggle = document.getElementById('menuToggle');
+        const closeDrawer = document.getElementById('closeDrawer');
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('overlay');
+        const drawerTabs = document.querySelectorAll('.drawer-tab');
+        const deviceIdInput = document.getElementById('deviceId');
+        const deviceOptions = document.getElementById('deviceOptions');
+        const deviceOptionInputs = document.querySelectorAll('input[name="deviceOption"]');
+        const generateButton = document.getElementById('generateButton');
+
+        // Toggle drawer on mobile
+        menuToggle.addEventListener('click', () => {
+            drawer.classList.add('open');
+            overlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeDrawer.addEventListener('click', closeDrawerFunction);
+        overlay.addEventListener('click', closeDrawerFunction);
+
+        function closeDrawerFunction() {
+            drawer.classList.remove('open');
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Drawer tab functionality
+        drawerTabs.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                
+                // Update active tab
+                drawerTabs.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Show corresponding pane
+                tabPanes.forEach(pane => pane.classList.remove('active'));
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+                
+                // Close drawer on mobile
+                closeDrawerFunction();
+                
+                // Load data if needed
+                if (tabId === 'manage') {
+                    loadKeysTable();
+                } else if (tabId === 'history') {
+                    loadHistoryTable();
+                }
+            });
+        });
+
+        // Show device options when device ID is empty
+        deviceIdInput.addEventListener('input', function() {
+            if (this.value.trim() === '') {
+                deviceOptions.style.display = 'block';
+            } else {
+                deviceOptions.style.display = 'none';
+                // Clear selection
+                deviceOptionInputs.forEach(input => input.checked = false);
+            }
+        });
+
+        // Tab functionality
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        
+        // Get form elements
+        const keyForm = document.getElementById('keyForm');
+        const durationSelect = document.getElementById('duration');
+        const keyCountInput = document.getElementById('keyCount');
+        const resultContainer = document.getElementById('resultContainer');
+        const keyList = document.getElementById('keyList');
+        const copyAllButton = document.getElementById('copyAllButton');
+        const messageElement = document.getElementById('message');
+        
+        // Manage tab elements
+        const searchKeyInput = document.getElementById('searchKey');
+        const searchButton = document.getElementById('searchButton');
+        const filterButtons = document.querySelectorAll('.filter-button');
+        const keysTableBody = document.getElementById('keysTableBody');
+        const noKeysMessage = document.getElementById('noKeysMessage');
+        
+        // History tab elements
+        const historySearchInput = document.getElementById('historySearch');
+        const historySearchButton = document.getElementById('historySearchButton');
+        const historyFilterButtons = document.querySelectorAll('.filter-button[data-history]');
+        const historyTableBody = document.getElementById('historyTableBody');
+        const noHistoryMessage = document.getElementById('noHistoryMessage');
+
+        // Function to generate a random key
+        function generateKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                if (i < 3) result += '-';
+            }
+            return result;
+        }
+
+        // Function to show message
+        function showMessage(text, isSuccess = true) {
+            messageElement.textContent = text;
+            messageElement.className = isSuccess ? 'message success' : 'message error';
+            messageElement.style.display = 'block';
+            
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 3000);
+        }
+
+        // Function to add activity to history
+        function addToHistory(activity, key, details = {}) {
+            const historyItem = {
+                timestamp: Date.now(),
+                activity,
+                key,
+                details
+            };
+            
+            set(ref(db, `keyHistory/${Date.now()}`), historyItem);
+        }
+
+        // Add a submit event listener to the form
+        keyForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Add animation to button
+            generateButton.classList.add('pulse');
+            
+            const duration = parseInt(durationSelect.value);
+            const deviceId = deviceIdInput.value.trim();
+            const keyCount = parseInt(keyCountInput.value);
+            let maxDevices = null;
+            
+            // Check if device options are selected
+            if (deviceId === '') {
+                const selectedOption = document.querySelector('input[name="deviceOption"]:checked');
+                if (selectedOption) {
+                    maxDevices = parseInt(selectedOption.value);
+                }
+            }
+            
+            // Generate keys and save to Firebase
+            const keys = [];
+            for (let i = 0; i < keyCount; i++) {
+                const key = generateKey();
+                keys.push(key);
+                
+                // Calculate expiration timestamp (current time + duration in days)
+                const expiry = Date.now() + (duration * 24 * 60 * 60 * 1000);
+                
+                // Prepare key data
+                const keyData = {
+                    active: true,
+                    expiry: expiry,
+                    frozen: false
+                };
+                
+                // Add device ID if provided
+                if (deviceId) {
+                    keyData.deviceId = deviceId;
+                }
+                
+                // Add max devices if selected
+                if (maxDevices) {
+                    keyData.maxDevices = maxDevices;
+                }
+                
+                // Save to Firebase
+                try {
+                    await set(ref(db, `accessKeys/${key}`), keyData);
+                    addToHistory('created', key, { duration, deviceId, maxDevices });
+                } catch (error) {
+                    console.error("Error saving key to Firebase:", error);
+                    showMessage('Error saving keys to database.', false);
+                    generateButton.classList.remove('pulse');
+                    return;
+                }
+            }
+            
+            // Display generated keys
+            keyList.innerHTML = '';
+            keys.forEach(key => {
+                const keyElement = document.createElement('div');
+                keyElement.className = 'key-display';
+                
+                const keyText = document.createElement('div');
+                keyText.className = 'key-text';
+                keyText.textContent = key;
+                
+                const keyActions = document.createElement('div');
+                keyActions.className = 'key-actions';
+                
+                const copyButton = document.createElement('button');
+                copyButton.className = 'copy-button';
+                copyButton.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                copyButton.addEventListener('click', () => {
+                    copyToClipboard(key);
+                    showMessage('Key copied to clipboard!');
+                });
+                
+                keyActions.appendChild(copyButton);
+                keyElement.appendChild(keyText);
+                keyElement.appendChild(keyActions);
+                
+                keyList.appendChild(keyElement);
+            });
+            
+            resultContainer.style.display = 'block';
+            showMessage(`${keys.length} key(s) generated successfully!`);
+            
+            // Remove animation from button
+            generateButton.classList.remove('pulse');
+        });
+
+        // Copy all keys to clipboard
+        copyAllButton.addEventListener('click', function() {
+            const keys = Array.from(document.querySelectorAll('.key-text'))
+                .map(el => el.textContent)
+                .join('\n');
+            
+            copyToClipboard(keys);
+            showMessage('All keys copied to clipboard!');
+        });
+
+        // Helper function to copy text to clipboard
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).catch(err => {
+                    console.error('Failed to copy text with Clipboard API: ', err);
+                    fallbackCopyText(text);
+                });
+            } else {
+                fallbackCopyText(text);
+            }
+        }
+
+        // Fallback copy method for older browsers
+        function fallbackCopyText(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Fallback copy failed: ', err);
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // Load keys table for management
+        function loadKeysTable(searchTerm = '', statusFilter = 'all') {
+            onValue(accessKeysRef, (snapshot) => {
+                const keysData = snapshot.val();
+                keysTableBody.innerHTML = '';
+                
+                if (!keysData) {
+                    noKeysMessage.style.display = 'block';
+                    return;
+                }
+                
+                noKeysMessage.style.display = 'none';
+                let hasResults = false;
+                
+                Object.entries(keysData).forEach(([key, keyData]) => {
+                    // Apply filters
+                    const isActive = keyData.active === true;
+                    const isExpired = keyData.expiry < Date.now();
+                    
+                    let shouldShow = true;
+                    
+                    // Apply search filter
+                    if (searchTerm) {
+                        const searchLower = searchTerm.toLowerCase();
+                        const keyMatch = key.toLowerCase().includes(searchLower);
+                        const deviceMatch = keyData.deviceId && keyData.deviceId.toLowerCase().includes(searchLower);
+                        
+                        if (!keyMatch && !deviceMatch) {
+                            shouldShow = false;
+                        }
+                    }
+                    
+                    // Apply status filter
+                    if (statusFilter !== 'all') {
+                        if (statusFilter === 'active' && (!isActive || isExpired)) {
+                            shouldShow = false;
+                        } else if (statusFilter === 'inactive' && isActive) {
+                            shouldShow = false;
+                        } else if (statusFilter === 'expired' && !isExpired) {
+                            shouldShow = false;
+                        }
+                    }
+                    
+                    if (shouldShow) {
+                        hasResults = true;
+                        const row = document.createElement('tr');
+                        
+                        // Format expiry date
+                        const expiryDate = new Date(keyData.expiry);
+                        const formattedDate = expiryDate.toLocaleDateString() + ' ' + expiryDate.toLocaleTimeString();
+                        
+                        // Determine status
+                        let statusText, statusClass;
+                        if (!isActive) {
+                            statusText = 'Disabled';
+                            statusClass = 'status-inactive';
+                        } else if (isExpired) {
+                            statusText = 'Expired';
+                            statusClass = 'status-expired';
+                        } else {
+                            statusText = 'Active';
+                            statusClass = 'status-active';
+                        }
+                        
+                        row.innerHTML = `
+                            <td>${key}</td>
+                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                            <td>${formattedDate}</td>
+                            <td>${keyData.deviceId || 'N/A'} ${keyData.maxDevices ? `(Max: ${keyData.maxDevices})` : ''}</td>
+                            <td>
+                                ${isActive ? 
+                                    `<button class="button danger disable-btn" data-key="${key}">Disable</button>` : 
+                                    `<button class="button secondary enable-btn" data-key="${key}">Enable</button>`
+                                }
+                                <button class="button secondary copy-btn" data-key="${key}">Copy</button>
+                            </td>
+                        `;
+                        
+                        keysTableBody.appendChild(row);
+                    }
+                });
+                
+                if (!hasResults) {
+                    noKeysMessage.style.display = 'block';
+                }
+                
+                // Add event listeners to buttons
+                document.querySelectorAll('.disable-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const key = e.target.getAttribute('data-key');
+                        disableKey(key);
+                    });
+                });
+                
+                document.querySelectorAll('.enable-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const key = e.target.getAttribute('data-key');
+                        enableKey(key);
+                    });
+                });
+                
+                document.querySelectorAll('.copy-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const key = e.target.getAttribute('data-key');
+                        copyToClipboard(key);
+                        showMessage('Key copied to clipboard!');
+                    });
+                });
+            });
+        }
+
+        // Disable a key
+        function disableKey(key) {
+            update(ref(db, `accessKeys/${key}`), { active: false })
+                .then(() => {
+                    showMessage(`Key ${key} has been disabled.`);
+                    addToHistory('disabled', key);
+                    loadKeysTable(); // Refresh the table
+                })
+                .catch(error => {
+                    console.error("Error disabling key:", error);
+                    showMessage('Error disabling key.', false);
+                });
+        }
+
+        // Enable a key
+        function enableKey(key) {
+            update(ref(db, `accessKeys/${key}`), { active: true })
+                .then(() => {
+                    showMessage(`Key ${key} has been enabled.`);
+                    addToHistory('enabled', key);
+                    loadKeysTable(); // Refresh the table
+                })
+                .catch(error => {
+                    console.error("Error enabling key:", error);
+                    showMessage('Error enabling key.', false);
+                });
+        }
+
+        // Load history table
+        function loadHistoryTable(searchTerm = '', activityFilter = 'all') {
+            onValue(historyRef, (snapshot) => {
+                const historyData = snapshot.val();
+                historyTableBody.innerHTML = '';
+                
+                if (!historyData) {
+                    noHistoryMessage.style.display = 'block';
+                    return;
+                }
+                
+                noHistoryMessage.style.display = 'none';
+                let hasResults = false;
+                
+                // Convert to array and sort by timestamp (newest first)
+                const historyArray = Object.entries(historyData || {})
+                    .map(([id, item]) => ({ id, ...item }))
+                    .sort((a, b) => b.timestamp - a.timestamp);
+                
+                historyArray.forEach(item => {
+                    // Apply filters
+                    let shouldShow = true;
+                    
+                    // Apply search filter
+                    if (searchTerm) {
+                        const searchLower = searchTerm.toLowerCase();
+                        const keyMatch = item.key.toLowerCase().includes(searchLower);
+                        const activityMatch = item.activity.toLowerCase().includes(searchLower);
+                        
+                        if (!keyMatch && !activityMatch) {
+                            shouldShow = false;
+                        }
+                    }
+                    
+                    // Apply activity filter
+                    if (activityFilter !== 'all' && item.activity !== activityFilter) {
+                        shouldShow = false;
+                    }
+                    
+                    if (shouldShow) {
+                        hasResults = true;
+                        const row = document.createElement('tr');
+                        
+                        // Format timestamp
+                        const date = new Date(item.timestamp);
+                        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                        
+                        // Format activity text
+                        let activityText = item.activity.charAt(0).toUpperCase() + item.activity.slice(1);
+                        
+                        // Format details
+                        let detailsText = '';
+                        if (item.activity === 'created' && item.details) {
+                            detailsText = `Duration: ${item.details.duration} days`;
+                            if (item.details.deviceId) {
+                                detailsText += `, Device: ${item.details.deviceId}`;
+                            }
+                            if (item.details.maxDevices) {
+                                detailsText += `, Max Devices: ${item.details.maxDevices}`;
+                            }
+                        }
+                        
+                        row.innerHTML = `
+                            <td>${formattedDate}</td>
+                            <td>${activityText}</td>
+                            <td>${item.key}</td>
+                            <td>${detailsText}</td>
+                        `;
+                        
+                        historyTableBody.appendChild(row);
+                    }
+                });
+                
+                if (!hasResults) {
+                    noHistoryMessage.style.display = 'block';
+                }
+            });
+        }
+
+        // Set up event listeners for manage tab
+        searchButton.addEventListener('click', () => {
+            loadKeysTable(searchKeyInput.value.trim());
+        });
+        
+        searchKeyInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadKeysTable(searchKeyInput.value.trim());
+            }
+        });
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                loadKeysTable(searchKeyInput.value.trim(), button.getAttribute('data-status'));
+            });
+        });
+
+        // Set up event listeners for history tab
+        historySearchButton.addEventListener('click', () => {
+            loadHistoryTable(historySearchInput.value.trim());
+        });
+        
+        historySearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadHistoryTable(historySearchInput.value.trim());
+            }
+        });
+        
+        historyFilterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                historyFilterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                loadHistoryTable(historySearchInput.value.trim(), button.getAttribute('data-history'));
+            });
+        });
+
+        // Initialize the page
+        loadKeysTable();
+    </script>
+</body>
+</html>
