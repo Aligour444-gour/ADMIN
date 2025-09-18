@@ -2,843 +2,594 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZENITH Key Manager</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script type="module" src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LICUIS ULTRA ADMIN</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #1976D2;
-            --primary-dark-blue: #0D47A1;
-            --primary-light-blue: #E3F2FD;
-            --secondary-blue: #2196F3;
-            --accent-blue: #82B1FF;
-            --white: #FFFFFF;
-            --light-gray: #F5F7FA;
-            --medium-gray: #E0E0E0;
-            --dark-gray: #546E7A;
-            --text-dark: #263238;
-            --text-light: #78909C;
-            --success: #4CAF50;
-            --error: #F44336;
-            --warning: #FF9800;
-            --border-radius: 12px;
-            --card-shadow: 0 8px 24px rgba(25, 118, 210, 0.12);
-            --button-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
-            --transition: all 0.3s ease;
-            --drawer-width: 280px;
+            --bg-primary: #0C1523;
+            --bg-secondary: #1A212F;
+            --bg-tertiary: #273142;
+            --text-primary: #E2E8F0;
+            --text-secondary: #94A3B8;
+            --accent-blue: #4D77FF;
+            --accent-teal: #00BFA6;
+            --danger: #EF4444;
+            --success: #10B981;
+            --warning: #F59E0B;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        body.dark-theme {
+            font-family: 'Poppins', Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
         }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            background: linear-gradient(135deg, var(--primary-light-blue) 0%, var(--white) 100%);
-            color: var(--text-dark);
-            overflow-x: hidden;
-        }
-
-        .app-container {
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 20px;
-        }
-
-        .generator-container {
-            width: 100%;
-            max-width: 800px;
-            background-color: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
-            transition: var(--transition);
-            position: relative;
-            margin: 20px 0;
-        }
-
-        .generator-header {
-            padding: 25px 20px 15px;
-            background: linear-gradient(45deg, var(--primary-blue), var(--secondary-blue));
-            color: var(--white);
-            position: relative;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            margin-right: 12px;
-            color: var(--white);
-        }
-
-        .logo-text {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--white);
-        }
-
-        .generator-header h1 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .tagline {
-            font-size: 13px;
-            opacity: 0.9;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-        }
-
-        .menu-toggle {
-            position: absolute;
-            top: 25px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: var(--white);
-            font-size: 24px;
-            cursor: pointer;
-            display: block;
-            z-index: 100;
-        }
-
-        .drawer {
+        /* General Layout */
+        .sidebar {
+            background-color: var(--bg-secondary);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+            z-index: 50;
             position: fixed;
             top: 0;
-            left: -300px;
-            width: var(--drawer-width);
-            height: 100%;
-            background-color: var(--white);
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            transition: var(--transition);
-            padding-top: 60px;
-            overflow-y: auto;
-        }
-
-        .drawer.open {
             left: 0;
-            animation: slideIn 0.3s ease;
+            height: 100vh;
+            transform: translateX(-100%);
         }
 
-        @keyframes slideIn {
-            from { left: -300px; }
-            to { left: 0; }
-        }
-
-        .drawer-tabs {
-            display: flex;
-            flex-direction: column;
-            background-color: var(--white);
-        }
-
-        .drawer-tab {
-            padding: 16px 20px;
-            font-size: 16px;
-            font-weight: 500;
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            color: var(--text-light);
-            text-align: left;
-            display: flex;
-            align-items: center;
-            border-left: 4px solid transparent;
-        }
-
-        .drawer-tab i {
-            margin-right: 12px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .drawer-tab.active {
-            color: var(--primary-blue);
-            font-weight: 600;
-            background-color: var(--primary-light-blue);
-            border-left-color: var(--primary-blue);
-        }
-
-        .drawer-tab:hover {
-            background-color: var(--light-gray);
-        }
-
-        .close-drawer {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--text-light);
-            cursor: pointer;
-        }
-
-        .tab-content {
-            padding: 20px;
-            max-height: calc(100vh - 200px);
-            overflow-y: auto;
-        }
-
-        .tab-pane {
-            display: none;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .tab-pane.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            position: relative;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid var(--medium-gray);
-            border-radius: var(--border-radius);
-            font-size: 16px;
-            outline: none;
-            font-family: 'Inter', sans-serif;
-            transition: var(--transition);
-            background-color: var(--light-gray);
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
-        }
-
-        .device-options {
-            display: none;
-            margin-top: 10px;
-            padding: 15px;
-            background-color: var(--light-gray);
-            border-radius: var(--border-radius);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .device-option {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .device-option:last-child {
-            margin-bottom: 0;
-        }
-
-        .device-option input {
-            margin-right: 10px;
-            width: auto;
-        }
-
-        .device-option label {
-            margin-bottom: 0;
-            font-weight: normal;
-        }
-
-        .main-button, .button {
-            padding: 14px 20px;
-            border: none;
-            border-radius: var(--border-radius);
-            background: linear-gradient(45deg, var(--primary-blue), var(--secondary-blue));
-            color: var(--white);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: 'Inter', sans-serif;
-            box-shadow: var(--button-shadow);
-            text-decoration: none;
-            display: inline-block;
-            line-height: 1;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .main-button:hover, .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(25, 118, 210, 0.4);
-        }
-
-        .button.secondary {
-            background: var(--white);
-            color: var(--primary-blue);
-            border: 1px solid var(--primary-blue);
-            box-shadow: none;
-            padding: 10px 16px;
-            font-size: 14px;
-        }
-
-        .button.secondary:hover {
-            background: var(--primary-light-blue);
-        }
-
-        .button.danger {
-            background: var(--white);
-            color: var(--error);
-            border: 1px solid var(--error);
-            box-shadow: none;
-            padding: 10px 16px;
-            font-size: 14px;
-        }
-
-        .button.danger:hover {
-            background: rgba(244, 67, 54, 0.1);
-        }
-
-        .result-container {
-            margin-top: 25px;
-            padding: 20px;
-            background-color: var(--light-gray);
-            border-radius: var(--border-radius);
-            text-align: left;
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .result-header {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: var(--text-dark);
-        }
-
-        .key-display {
-            background-color: var(--white);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            font-family: monospace;
-            font-size: 14px;
-            word-break: break-all;
-            margin-bottom: 15px;
-            border: 1px solid var(--medium-gray);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            animation: slideIn 0.3s ease;
-        }
-
-        @media (min-width: 480px) {
-            .key-display {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0);
+                position: static;
             }
         }
 
-        .key-text {
-            flex: 1;
-            overflow-x: auto;
+        .sidebar.active {
+            transform: translateX(0);
         }
 
-        .key-actions {
+        .main-content {
+            flex-grow: 1;
+            background-color: var(--bg-primary);
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                padding-left: 288px;
+            }
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 60;
             display: flex;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .copy-button {
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: var(--border-radius);
+            align-items: center;
+            justify-content: center;
+            width: 3rem;
+            height: 3rem;
+            background-color: var(--accent-blue);
+            color: var(--bg-primary);
+            border-radius: 50%;
             cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-            white-space: nowrap;
+            transition: background-color 0.3s;
         }
 
-        .copy-button:hover {
-            background: var(--primary-dark-blue);
+        .sidebar-close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            transition: color 0.3s;
         }
 
-        .message {
-            padding: 10px;
-            border-radius: var(--border-radius);
-            margin-top: 15px;
-            display: none;
-            font-weight: 500;
-            animation: fadeIn 0.3s ease;
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            margin: 0.5rem 0;
+            border-radius: 0.5rem;
+            color: var(--text-secondary);
+            transition: all 0.2s;
         }
 
-        .success {
-            background-color: rgba(76, 175, 80, 0.1);
-            color: var(--success);
-            border: 1px solid var(--success);
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background-color: rgba(77, 119, 255, 0.1);
+            color: var(--accent-blue);
+            transform: translateX(5px);
         }
 
-        .error {
-            background-color: rgba(244, 67, 54, 0.1);
-            color: var(--error);
-            border: 1px solid var(--error);
+        .card {
+            background-color: var(--bg-secondary);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 1rem;
+            padding: 2rem;
         }
 
-        .history-table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 600px;
-        }
-
-        .history-table th,
-        .history-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--medium-gray);
-        }
-
-        .history-table th {
-            background-color: var(--light-gray);
+        .card-title {
+            color: var(--accent-blue);
+            font-size: 1.5rem;
             font-weight: 600;
-            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
         }
 
-        .history-table tr {
-            transition: var(--transition);
+        .card-title .icon {
+            color: var(--accent-teal);
+            margin-right: 0.75rem;
         }
 
-        .history-table tr:hover {
-            background-color: var(--light-gray);
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-size: 12px;
+        /* Form Elements */
+        .input-group label {
+            color: var(--text-secondary);
             font-weight: 500;
+            display: block;
+            margin-bottom: 0.5rem;
         }
 
-        .status-active {
-            background-color: rgba(76, 175, 80, 0.1);
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper .icon,
+        .input-group .icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .search-input,
+        .input-wrapper input,
+        .input-group select {
+            background-color: var(--bg-tertiary);
+            border: 1px solid transparent;
+            color: var(--text-primary);
+            transition: border-color 0.3s, box-shadow 0.3s;
+            padding-left: 2.5rem;
+        }
+
+        .search-input:focus,
+        .input-wrapper input:focus,
+        .input-group select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(77, 119, 255, 0.3);
+            outline: none;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--accent-teal);
+            color: var(--bg-primary);
+            transition: all 0.3s;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .btn-primary:hover {
+            background-color: #008f7f;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #F59E0B;
+            color: var(--bg-primary);
+            transition: all 0.3s;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d88a0e;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+            transition: all 0.3s;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-danger:hover {
+            background-color: #d13a3a;
+        }
+
+        /* Specific Components */
+        .key-box,
+        .history-item-card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid rgba(77, 119, 255, 0.15);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .key-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-active,
+        .valid {
             color: var(--success);
         }
 
-        .status-inactive {
-            background-color: rgba(244, 67, 54, 0.1);
-            color: var(--error);
+        .status-inactive,
+        .expired {
+            color: var(--danger);
         }
 
-        .status-expired {
-            background-color: rgba(255, 152, 0, 0.1);
+        .status-frozen {
             color: var(--warning);
         }
 
-        .search-box {
-            display: flex;
-            margin-bottom: 20px;
-            gap: 10px;
-            flex-direction: column;
+        .device-bound {
+            color: var(--accent-blue);
         }
 
-        @media (min-width: 480px) {
-            .search-box {
-                flex-direction: row;
-            }
+        .device-unbound {
+            color: var(--text-secondary);
         }
 
-        .search-box input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 1px solid var(--medium-gray);
-            border-radius: var(--border-radius);
-            font-size: 14px;
-            outline: none;
-            transition: var(--transition);
+        .modal {
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
         }
 
-        .search-box input:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+        .modal-content {
+            background-color: var(--bg-secondary);
+            border: 1px solid rgba(77, 119, 255, 0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            color: var(--text-primary);
+            border-radius: 1rem;
         }
 
-        .filter-options {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+        .close-button {
+            color: var(--text-secondary);
+            font-size: 1.5rem;
         }
 
-        .filter-button {
-            padding: 8px 16px;
-            background: var(--white);
-            border: 1px solid var(--medium-gray);
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 14px;
+        .history-item-card .action-type {
+            color: var(--accent-blue);
+            font-weight: 600;
         }
 
-        .filter-button.active {
-            background: var(--primary-blue);
-            color: var(--white);
-            border-color: var(--primary-blue);
+        .history-item-card pre {
+            background-color: var(--bg-tertiary);
+            border: 1px solid rgba(77, 119, 255, 0.1);
+            color: var(--text-secondary);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px 0;
-            color: var(--text-light);
-        }
-
-        .empty-state svg {
+        /* Custom Switch for Toggles */
+        .switch {
+            position: relative;
+            display: inline-block;
             width: 60px;
-            height: 60px;
-            margin-bottom: 15px;
-            color: var(--medium-gray);
+            height: 34px;
         }
 
-        .overlay {
-            position: fixed;
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            display: none;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
         }
 
-        /* Animation classes */
-        .fade-in {
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .slide-in {
-            animation: slideIn 0.4s ease;
-        }
-        
-        .pulse {
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .shake {
-            animation: shake 0.5s;
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
         }
 
-        /* Responsive improvements */
-        @media (max-width: 768px) {
-            .app-container {
-                padding: 10px;
-            }
-            
-            .generator-container {
-                width: 100%;
-                margin: 10px 0;
-            }
-            
-            .generator-header {
-                padding: 20px 15px 15px;
-            }
-            
-            .logo-text {
-                font-size: 22px;
-            }
-            
-            .tab-content {
-                padding: 15px;
-                max-height: none;
-            }
-            
-            .button {
-                width: 100%;
-                margin-bottom: 8px;
-            }
-            
-            .search-box {
-                flex-direction: column;
-            }
-            
-            .filter-options {
-                justify-content: center;
-            }
+        input:checked+.slider {
+            background-color: var(--accent-blue);
         }
 
-        @media (max-width: 480px) {
-            .logo {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .logo-icon {
-                margin-bottom: 8px;
-            }
-            
-            .generator-header h1 {
-                font-size: 18px;
-            }
-            
-            .tagline {
-                font-size: 12px;
-            }
-            
-            .form-group input, .form-group select {
-                padding: 12px 14px;
-            }
-            
-            .main-button, .button {
-                padding: 12px 16px;
-                font-size: 15px;
-            }
-            
-            .key-display {
-                padding: 12px;
-            }
-            
-            .key-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .copy-button {
-                width: 100%;
-            }
+        input:focus+.slider {
+            box-shadow: 0 0 1px var(--accent-blue);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
         }
     </style>
 </head>
-<body>
-    <div class="app-container">
-        <div class="generator-container">
-            <div class="generator-header">
-                <div class="logo">
-                    <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1 15h2v2h-2v-2zm-1-4.83a2 2 0 011.85-2.09c.8-.08 1.48.51 1.63 1.3.16.8.02 1.6-.32 2.3-.34.7-.76 1.34-1.25 1.94-.49.6-.96 1.18-1.4 1.76l-.01.01h.01c-.6.8-1.57 1.3-2.67 1.3-1.4 0-2.52-1.12-2.52-2.5 0-.9.46-1.7 1.2-2.18.73-.48 1.62-.68 2.5-.59zM12 4a8 8 0 018 8c0 4.418-3.582 8-8 8S4 16.418 4 12 7.582 4 12 4zm-1 5.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
-                    </svg>
-                    <div class="logo-text">ZENITH ADMIN PANEL</div>
-                </div>
-                <h1>License Key Manager</h1>
-                <p class="tagline"></p>
-                <button class="menu-toggle" id="menuToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-            
-            <!-- Drawer for mobile navigation -->
-            <div class="drawer" id="drawer">
-                <button class="close-drawer" id="closeDrawer">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="drawer-tabs">
-                    <button class="drawer-tab active" data-tab="create">
-                        <i class="fas fa-key"></i>Create Keys
-                    </button>
-                    <button class="drawer-tab" data-tab="manage">
-                        <i class="fas fa-cog"></i>Manage Keys
-                    </button>
-                    <button class="drawer-tab" data-tab="history">
-                        <i class="fas fa-history"></i>Key History
-                    </button>
-                </div>
-            </div>
-            
-            <div class="tab-content">
-                <!-- Create Keys Tab -->
-                <div class="tab-pane active" id="create-tab">
-                    <form id="keyForm">
-                        <div class="form-group">
-                            <label for="duration">License Duration</label>
-                            <select id="duration" required>
-                                <option value="1">1 Day</option>
-                                <option value="7">7 Days</option>
-                                <option value="30" selected>30 Days</option>
-                                <option value="90">90 Days</option>
-                                <option value="365">365 Days</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="deviceId">Device ID (Optional - for binding)</label>
-                            <input type="text" id="deviceId" placeholder="Leave empty for multi-device use">
-                            <div class="device-options" id="deviceOptions">
-                                <div class="device-option">
-                                    <input type="radio" id="option2" name="deviceOption" value="2">
-                                    <label for="option2">2 Devices</label>
-                                </div>
-                                <div class="device-option">
-                                    <input type="radio" id="option3" name="deviceOption" value="3">
-                                    <label for="option3">3 Devices</label>
-                                </div>
-                                <div class="device-option">
-                                    <input type="radio" id="option5" name="deviceOption" value="5">
-                                    <label for="option5">5 Devices</label>
+<body class="dark-theme flex min-h-screen">
+    <div id="sidebarToggle" class="sidebar-toggle md:hidden">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <div id="sidebar" class="sidebar w-72 p-6 flex flex-col md:static">
+        <span class="sidebar-close-btn md:hidden" id="sidebarCloseBtn"><i class="fas fa-times"></i></span>
+        <div class="happi-admin-title text-2xl font-bold text-center mb-8">LICUIS ULTRA ADMIN</div>
+        <nav class="flex-grow">
+            <a href="#" class="sidebar-link active" data-section="keyGeneratorSection">
+                <i class="fas fa-key w-6 mr-3"></i> Create a Key
+            </a>
+            <a href="#" class="sidebar-link" data-section="manageHistorySection">
+                <i class="fas fa-history w-6 mr-3"></i> Manage History
+            </a>
+            <a href="#" class="sidebar-link" data-section="manageSettingsSection">
+                <i class="fas fa-cogs w-6 mr-3"></i> Manage Settings
+            </a>
+        </nav>
+        <div class="text-xs text-center text-gray-400 mt-4"></div>
+    </div>
+
+    <div class="main-content p-8 pt-20 md:pt-8 overflow-y-auto">
+        <h1 class="text-3xl font-bold mb-8" style="color: var(--text-primary);">
+            <span id="currentSectionTitle">Key Generator</span>
+        </h1>
+
+        <div id="keyGeneratorSection" class="content-section">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card lg:col-span-1">
+                    <h2 class="card-title">
+                        <i class="fas fa-plus-circle icon"></i>Create New Access Key
+                    </h2>
+                    <div id="key-creation" class="space-y-6">
+                        <div>
+                            <div class="input-group">
+                                <label for="key"><i class="fas fa-fingerprint mr-2"></i>KEY</label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="key" placeholder="Enter key"
+                                        class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="keyCount">Number of Keys to Generate</label>
-                            <input type="number" id="keyCount" value="1" min="1" max="10" required>
+                        <div>
+                            <div class="input-group">
+                                <label for="create_deviceId"><i class="fas fa-desktop mr-2"></i>Device ID (optional)</label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="create_deviceId" placeholder="Enter Device ID (e.g., USER-PC-001)"
+                                        class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                                </div>
+                            </div>
                         </div>
-                        
-                        <button type="submit" class="main-button" id="generateButton">
-                            <i class="fas fa-key"></i> Generate Keys
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <div class="input-group">
+                                    <label for="durationValue"><i class="fas fa-hourglass-half mr-2"></i>Duration Value</label>
+                                    <input type="number" id="durationValue" placeholder="Duration value" value="1" min="1"
+                                        class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                                </div>
+                            </div>
+                            <div>
+                                <div class="input-group">
+                                    <label for="durationUnit"><i class="fas fa-calendar-day mr-2"></i>Duration Unit</label>
+                                    <select id="durationUnit"
+                                        class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                                        <option value="minutes">Minutes</option>
+                                        <option value="days" selected>Days</option>
+                                        <option value="months">Months</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="createKey()" class="w-full btn-primary">
+                            <i class="fas fa-save mr-2"></i>Create Key
                         </button>
-                    </form>
-                    
-                    <div class="result-container" id="resultContainer">
-                        <div class="result-header">Generated Keys:</div>
-                        <div id="keyList"></div>
-                        <button class="copy-button" id="copyAllButton">
-                            <i class="fas fa-copy"></i> Copy All Keys
+                        <button onclick="generateRandomKey()" class="w-full btn-secondary">
+                            <i class="fas fa-dice mr-2"></i>Generate Random Key
                         </button>
-                        <div id="message" class="message"></div>
                     </div>
                 </div>
-                
-                <!-- Manage Keys Tab -->
-                <div class="tab-pane" id="manage-tab">
-                    <div class="search-box">
-                        <input type="text" id="searchKey" placeholder="Search by key or device ID...">
-                        <button class="button" id="searchButton">
-                            <i class="fas fa-search"></i> Search
-                        </button>
-                    </div>
-                    
-                    <div class="filter-options">
-                        <button class="filter-button active" data-status="all">All Keys</button>
-                        <button class="filter-button" data-status="active">Active Only</button>
-                        <button class="filter-button" data-status="inactive">Disabled Only</button>
-                        <button class="filter-button" data-status="expired">Expired Only</button>
-                    </div>
-                    
-                    <div id="keysTableContainer">
-                        <div class="history-table-container">
-                            <table class="history-table">
-                                <thead>
-                                    <tr>
-                                        <th>Key</th>
-                                        <th>Status</th>
-                                        <th>Expiry Date</th>
-                                        <th>Device ID</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="keysTableBody">
-                                    <!-- Keys will be populated here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <div id="noKeysMessage" class="empty-state" style="display: none;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                        </svg>
-                        <p>No keys found. Generate some keys first.</p>
-                    </div>
-                </div>
-                
-                <!-- History Tab -->
-                <div class="tab-pane" id="history-tab">
-                    <div class="search-box">
-                        <input type="text" id="historySearch" placeholder="Search history...">
-                        <button class="button" id="historySearchButton">
-                            <i class="fas fa-search"></i> Search
-                        </button>
-                    </div>
-                    
-                    <div class="filter-options">
-                        <button class="filter-button active" data-history="all">All Activities</button>
-                        <button class="filter-button" data-history="created">Key Creation</button>
-                        <button class="filter-button" data-history="disabled">Key Disabling</button>
-                        <button class="filter-button" data-history="enabled">Key Enabling</button>
-                    </div>
-                    
-                    <div id="historyTableContainer">
-                        <div class="history-table-container">
-                            <table class="history-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Activity</th>
-                                        <th>Key</th>
-                                        <th>Details</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="historyTableBody">
-                                    <!-- History will be populated here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <div id="noHistoryMessage" class="empty-state" style="display: none;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p>No activity history yet.</p>
+
+                <div class="card lg:col-span-2">
+                    <h2 class="card-title flex items-center justify-between">
+                        <span><i class="fas fa-list-alt icon"></i>ACCESS KEYS HISTORY</span>
+                        <span id="keyCount" class="text-lg text-gray-600 font-normal">TOTAL KEYS: 0</span>
+                    </h2>
+                    <input type="text" id="search" placeholder="Search keys..." onkeyup="renderAccessKeys()"
+                        class="w-full px-4 py-3 rounded-md focus:outline-none focus:ring-2 search-input mb-4">
+                    <div id="key-list-container" class="overflow-y-auto max-h-96">
+                        <div id="keys" class="space-y-4"></div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div id="manageHistorySection" class="content-section hidden">
+            <div class="card">
+                <div class="card-title"><span class="icon fas fa-history"></span> Action History</div>
+                <input type="text" id="historySearch" placeholder="Search history..." onkeyup="renderHistory()"
+                    class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input mb-4">
+                <div id="historyListContainer" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <div id="manageSettingsSection" class="content-section hidden">
+            <div class="card max-w-2xl mx-auto">
+                <div class="card-title"><span class="icon fas fa-cogs"></span> Web Settings</div>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-2">System Modes</label>
+                        <div class="flex items-center justify-between py-2">
+                            <span>Maintenance Mode</span>
+                            <label class="switch">
+                                <input type="checkbox" id="maintenanceModeToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between py-2">
+                            <span>Web Off (404 Mode)</span>
+                            <label class="switch">
+                                <input type="checkbox" id="webOffToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-2">Redirect Settings</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-external-link-alt icon"></i>
+                            <input type="text" id="redirectUrl" placeholder="Redirect URL"
+                                class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                        </div>
+                    </div>
+                </div>
+                <button id="saveSettingsBtn" class="btn-primary w-full mt-6"><span class="icon fas fa-save"></span> Save
+                    Changes</button>
+                <p id="settingsMessage" class="text-sm mt-4 text-center"></p>
+            </div>
+        </div>
     </div>
 
-    <div class="overlay" id="overlay"></div>
+    <div id="customModal" class="fixed inset-0 flex items-center justify-center p-4 modal hidden">
+        <div class="modal-content text-center p-8 max-w-sm w-full mx-auto">
+            <span class="absolute top-4 right-4 cursor-pointer close-button" onclick="closeCustomModal()">&times;</span>
+            <div id="modalIcon" class="text-4xl mb-4"></div>
+            <h3 id="modalTitle" class="text-xl font-bold mb-2"></h3>
+            <p id="modalMessage" class="text-gray-400 mb-4"></p>
+            <div id="modalActions" class="flex justify-center space-x-4">
+                <button id="modalConfirmBtn"
+                    class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 hidden">Confirm</button>
+                <button id="modalCloseBtn" class="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editAccessKeyModal" class="fixed inset-0 flex items-center justify-center p-4 modal hidden">
+        <div class="modal-content p-8 max-w-lg w-full mx-auto">
+            <span class="absolute top-4 right-4 cursor-pointer close-button"
+                onclick="closeEditAccessKeyModal()">&times;</span>
+            <h2 class="text-xl font-semibold mb-4">Edit Access Key</h2>
+            <form id="editAccessKeyForm" class="space-y-4">
+                <input type="hidden" id="edit_key_original_name">
+                <div>
+                    <label for="edit_key_name" class="block text-sm font-medium text-gray-400 mb-1">Key Name</label>
+                    <input type="text" id="edit_key_name" name="edit_key_name" required readonly
+                        class="w-full px-4 py-2 rounded-md search-input bg-gray-600 cursor-not-allowed">
+                </div>
+                <div>
+                    <label for="edit_key_deviceId" class="block text-sm font-medium text-gray-400 mb-1">Device ID (leave blank for UNBOUND)</label>
+                    <input type="text" id="edit_key_deviceId" name="edit_key_deviceId"
+                        class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="edit_durationValue" class="block text-sm font-medium text-gray-400 mb-1">Duration
+                            Value</label>
+                        <input type="number" id="edit_durationValue" name="edit_durationValue" min="1" value="1" required
+                            class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                    </div>
+                    <div>
+                        <label for="edit_durationUnit" class="block text-sm font-medium text-gray-400 mb-1">Duration
+                            Unit</label>
+                        <select id="edit_durationUnit" name="edit_durationUnit" required
+                            class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                            <option value="minutes">Minutes</option>
+                            <option value="days">Days</option>
+                            <option value="months">Months</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeEditAccessKeyModal()"
+                        class="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400">Cancel</button>
+                    <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Save
+                        Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editResellerModal" class="fixed inset-0 flex items-center justify-center p-4 modal hidden">
+        <div class="modal-content p-8 max-w-lg w-full mx-auto">
+            <span class="absolute top-4 right-4 cursor-pointer close-button"
+                onclick="closeEditResellerModal()">&times;</span>
+            <h2 class="text-xl font-semibold mb-4">Edit Reseller</h2>
+            <form id="editResellerForm" class="space-y-4">
+                <input type="hidden" id="edit_reseller_id">
+                <div>
+                    <label for="edit_reseller_username" class="block text-sm font-medium text-gray-400 mb-1">Username</label>
+                    <input type="text" id="edit_reseller_username" name="edit_reseller_username" required
+                        class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                </div>
+                <div>
+                    <label for="edit_reseller_password" class="block text-sm font-medium text-gray-400 mb-1">Password (Leave
+                        blank to keep current)</label>
+                    <input type="password" id="edit_reseller_password" name="edit_reseller_password"
+                        class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                </div>
+                <div>
+                    <label for="edit_reseller_deviceId" class="block text-sm font-medium text-gray-400 mb-1">Device ID (Leave
+                        blank for UNBOUND)</label>
+                    <input type="text" id="edit_reseller_deviceId" name="edit_reseller_deviceId"
+                        class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="edit_reseller_durationValue" class="block text-sm font-medium text-gray-400 mb-1">Add
+                            Duration</label>
+                        <input type="number" id="edit_reseller_durationValue" name="edit_reseller_durationValue" min="1"
+                            value="1" required
+                            class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                    </div>
+                    <div>
+                        <label for="edit_reseller_durationUnit" class="block text-sm font-medium text-gray-400 mb-1">Duration
+                            Unit</label>
+                        <select id="edit_reseller_durationUnit" name="edit_reseller_durationUnit" required
+                            class="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 search-input">
+                            <option value="minutes">Minutes</option>
+                            <option value="days">Days</option>
+                            <option value="months">Months</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeEditResellerModal()"
+                        class="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400">Cancel</button>
+                    <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Save
+                        Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <script type="module">
-        // Firebase initialization and app logic remains the same as in the original code
-        // Only the responsive UI changes were made in the HTML and CSS
-        // The JavaScript functionality is preserved exactly as provided
-        
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js';
-        import { getDatabase, ref, set, update, onValue, off, get, query, orderByChild, equalTo } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js';
+        import { getDatabase, ref, push, set, onValue, get, child, update, remove } from 'https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js';
 
-        // Initialize Firebase with the provided configuration
+        // --- Firebase Configuration (REQUIRED) ---
         const firebaseConfig = {
             apiKey: "AIzaSyACm2KBFC7p-7X6cLSeQGgcFwWj8ELu6j8",
             authDomain: "backdoor-3da3d.firebaseapp.com",
@@ -848,531 +599,494 @@
             messagingSenderId: "296618804855",
             appId: "1:296618804855:android:7df6b32fcc6cf1178ce872"
         };
-        
+        // End of Firebase Configuration
+
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const accessKeysRef = ref(db, 'accessKeys');
-        const historyRef = ref(db, 'keyHistory');
+        const settingsRef = ref(db, 'settings');
+        const historyRef = ref(db, 'history');
 
-        // UI Elements
-        const menuToggle = document.getElementById('menuToggle');
-        const closeDrawer = document.getElementById('closeDrawer');
-        const drawer = document.getElementById('drawer');
-        const overlay = document.getElementById('overlay');
-        const drawerTabs = document.querySelectorAll('.drawer-tab');
-        const deviceIdInput = document.getElementById('deviceId');
-        const deviceOptions = document.getElementById('deviceOptions');
-        const deviceOptionInputs = document.querySelectorAll('input[name="deviceOption"]');
-        const generateButton = document.getElementById('generateButton');
+        // --- Custom Modal Functions ---
+        const customModal = document.getElementById('customModal');
+        const modalIcon = document.getElementById('modalIcon');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
 
-        // Toggle drawer on mobile
-        menuToggle.addEventListener('click', () => {
-            drawer.classList.add('open');
-            overlay.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        });
-
-        closeDrawer.addEventListener('click', closeDrawerFunction);
-        overlay.addEventListener('click', closeDrawerFunction);
-
-        function closeDrawerFunction() {
-            drawer.classList.remove('open');
-            overlay.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        // Drawer tab functionality
-        drawerTabs.forEach(button => {
-            button.addEventListener('click', () => {
-                const tabId = button.getAttribute('data-tab');
-                
-                // Update active tab
-                drawerTabs.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                
-                // Show corresponding pane
-                tabPanes.forEach(pane => pane.classList.remove('active'));
-                document.getElementById(`${tabId}-tab`).classList.add('active');
-                
-                // Close drawer on mobile
-                closeDrawerFunction();
-                
-                // Load data if needed
-                if (tabId === 'manage') {
-                    loadKeysTable();
-                } else if (tabId === 'history') {
-                    loadHistoryTable();
-                }
-            });
-        });
-
-        // Show device options when device ID is empty
-        deviceIdInput.addEventListener('input', function() {
-            if (this.value.trim() === '') {
-                deviceOptions.style.display = 'block';
-            } else {
-                deviceOptions.style.display = 'none';
-                // Clear selection
-                deviceOptionInputs.forEach(input => input.checked = false);
+        function openCustomModal(type, title, message, onConfirm = null) {
+            modalIcon.className = 'text-4xl mb-4';
+            if (type === 'success') {
+                modalIcon.classList.add('text-green-500');
+                modalIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            } else if (type === 'error') {
+                modalIcon.classList.add('text-red-500');
+                modalIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+            } else if (type === 'info') {
+                modalIcon.classList.add('text-blue-500');
+                modalIcon.innerHTML = '<i class="fas fa-info-circle"></i>';
+            } else if (type === 'confirm') {
+                modalIcon.classList.add('text-yellow-500');
+                modalIcon.innerHTML = '<i class="fas fa-question-circle"></i>';
             }
-        });
 
-        // Tab functionality
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const tabPanes = document.querySelectorAll('.tab-pane');
-        
-        // Get form elements
-        const keyForm = document.getElementById('keyForm');
-        const durationSelect = document.getElementById('duration');
-        const keyCountInput = document.getElementById('keyCount');
-        const resultContainer = document.getElementById('resultContainer');
-        const keyList = document.getElementById('keyList');
-        const copyAllButton = document.getElementById('copyAllButton');
-        const messageElement = document.getElementById('message');
-        
-        // Manage tab elements
-        const searchKeyInput = document.getElementById('searchKey');
-        const searchButton = document.getElementById('searchButton');
-        const filterButtons = document.querySelectorAll('.filter-button');
-        const keysTableBody = document.getElementById('keysTableBody');
-        const noKeysMessage = document.getElementById('noKeysMessage');
-        
-        // History tab elements
-        const historySearchInput = document.getElementById('historySearch');
-        const historySearchButton = document.getElementById('historySearchButton');
-        const historyFilterButtons = document.querySelectorAll('.filter-button[data-history]');
-        const historyTableBody = document.getElementById('historyTableBody');
-        const noHistoryMessage = document.getElementById('noHistoryMessage');
+            modalTitle.textContent = title;
+            modalMessage.innerHTML = message;
 
-        // Function to generate a random key
-        function generateKey() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let result = '';
-            for (let i = 0; i < 4; i++) {
-                for (let j = 0; j < 4; j++) {
-                    result += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                if (i < 3) result += '-';
-            }
-            return result;
-        }
-
-        // Function to show message
-        function showMessage(text, isSuccess = true) {
-            messageElement.textContent = text;
-            messageElement.className = isSuccess ? 'message success' : 'message error';
-            messageElement.style.display = 'block';
-            
-            setTimeout(() => {
-                messageElement.style.display = 'none';
-            }, 3000);
-        }
-
-        // Function to add activity to history
-        function addToHistory(activity, key, details = {}) {
-            const historyItem = {
-                timestamp: Date.now(),
-                activity,
-                key,
-                details
-            };
-            
-            set(ref(db, `keyHistory/${Date.now()}`), historyItem);
-        }
-
-        // Add a submit event listener to the form
-        keyForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            
-            // Add animation to button
-            generateButton.classList.add('pulse');
-            
-            const duration = parseInt(durationSelect.value);
-            const deviceId = deviceIdInput.value.trim();
-            const keyCount = parseInt(keyCountInput.value);
-            let maxDevices = null;
-            
-            // Check if device options are selected
-            if (deviceId === '') {
-                const selectedOption = document.querySelector('input[name="deviceOption"]:checked');
-                if (selectedOption) {
-                    maxDevices = parseInt(selectedOption.value);
-                }
-            }
-            
-            // Generate keys and save to Firebase
-            const keys = [];
-            for (let i = 0; i < keyCount; i++) {
-                const key = generateKey();
-                keys.push(key);
-                
-                // Calculate expiration timestamp (current time + duration in days)
-                const expiry = Date.now() + (duration * 24 * 60 * 60 * 1000);
-                
-                // Prepare key data
-                const keyData = {
-                    active: true,
-                    expiry: expiry,
-                    frozen: false
+            if (onConfirm) {
+                modalConfirmBtn.style.display = 'inline-block';
+                modalConfirmBtn.onclick = () => {
+                    onConfirm();
+                    closeCustomModal();
                 };
-                
-                // Add device ID if provided
-                if (deviceId) {
-                    keyData.deviceId = deviceId;
-                }
-                
-                // Add max devices if selected
-                if (maxDevices) {
-                    keyData.maxDevices = maxDevices;
-                }
-                
-                // Save to Firebase
-                try {
-                    await set(ref(db, `accessKeys/${key}`), keyData);
-                    addToHistory('created', key, { duration, deviceId, maxDevices });
-                } catch (error) {
-                    console.error("Error saving key to Firebase:", error);
-                    showMessage('Error saving keys to database.', false);
-                    generateButton.classList.remove('pulse');
-                    return;
-                }
-            }
-            
-            // Display generated keys
-            keyList.innerHTML = '';
-            keys.forEach(key => {
-                const keyElement = document.createElement('div');
-                keyElement.className = 'key-display';
-                
-                const keyText = document.createElement('div');
-                keyText.className = 'key-text';
-                keyText.textContent = key;
-                
-                const keyActions = document.createElement('div');
-                keyActions.className = 'key-actions';
-                
-                const copyButton = document.createElement('button');
-                copyButton.className = 'copy-button';
-                copyButton.innerHTML = '<i class="fas fa-copy"></i> Copy';
-                copyButton.addEventListener('click', () => {
-                    copyToClipboard(key);
-                    showMessage('Key copied to clipboard!');
-                });
-                
-                keyActions.appendChild(copyButton);
-                keyElement.appendChild(keyText);
-                keyElement.appendChild(keyActions);
-                
-                keyList.appendChild(keyElement);
-            });
-            
-            resultContainer.style.display = 'block';
-            showMessage(`${keys.length} key(s) generated successfully!`);
-            
-            // Remove animation from button
-            generateButton.classList.remove('pulse');
-        });
-
-        // Copy all keys to clipboard
-        copyAllButton.addEventListener('click', function() {
-            const keys = Array.from(document.querySelectorAll('.key-text'))
-                .map(el => el.textContent)
-                .join('\n');
-            
-            copyToClipboard(keys);
-            showMessage('All keys copied to clipboard!');
-        });
-
-        // Helper function to copy text to clipboard
-        function copyToClipboard(text) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).catch(err => {
-                    console.error('Failed to copy text with Clipboard API: ', err);
-                    fallbackCopyText(text);
-                });
+                modalCloseBtn.textContent = 'Cancel';
             } else {
-                fallbackCopyText(text);
+                modalConfirmBtn.style.display = 'none';
+                modalCloseBtn.textContent = 'Close';
             }
+            modalCloseBtn.onclick = closeCustomModal;
+            customModal.style.display = 'flex';
         }
 
-        // Fallback copy method for older browsers
-        function fallbackCopyText(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.top = '0';
-            textarea.style.left = '0';
-            document.body.appendChild(textarea);
-            textarea.focus();
-            textarea.select();
-            
+        function closeCustomModal() {
+            customModal.style.display = 'none';
+            modalConfirmBtn.onclick = null;
+            modalCloseBtn.onclick = null;
+        }
+
+        // --- Utility Functions ---
+
+        // Function to format time left (for expiry)
+        function formatTimeLeft(ms) {
+            const secs = Math.floor(ms / 1000);
+            if (secs <= 0) return 'EXPIRED';
+
+            const secondsInMinute = 60;
+            const secondsInHour = 60 * secondsInMinute;
+            const secondsInDay = 24 * secondsInHour;
+            const secondsInMonth = 30 * secondsInDay;
+
+            const months = Math.floor(secs / secondsInMonth);
+            const remainingSecsAfterMonths = secs % secondsInMonth;
+            const days = Math.floor(remainingSecsAfterMonths / secondsInDay);
+            const remainingSecsAfterDays = remainingSecsAfterMonths % secondsInDay;
+            const hours = Math.floor(remainingSecsAfterDays / secondsInHour);
+            const remainingSecsAfterHours = remainingSecsAfterDays % secondsInHour;
+            const minutes = Math.floor(remainingSecsAfterHours / secondsInMinute);
+            const seconds = remainingSecsAfterHours % secondsInMinute;
+
+            let timeLeftStr = "";
+            if (months > 0) timeLeftStr += `${months}M `;
+            if (days > 0) timeLeftStr += `${days}D `;
+            if (hours > 0) timeLeftStr += `${hours}H `;
+            if (minutes > 0) timeLeftStr += `${minutes}M `;
+            if (seconds > 0 || (months === 0 && days === 0 && hours === 0 && minutes === 0)) timeLeftStr += `${seconds}S`;
+
+            return timeLeftStr.trim();
+        }
+
+        // Function to calculate expiry timestamp for Access Keys, handling months accurately
+        function calculateExpiry(durationValue, durationUnit, currentTimestamp = Date.now()) {
+            let expiryDate = new Date(currentTimestamp);
+
+            if (durationUnit === 'minutes') {
+                expiryDate.setMinutes(expiryDate.getMinutes() + durationValue);
+            } else if (durationUnit === 'days') {
+                expiryDate.setDate(expiryDate.getDate() + durationValue);
+            } else if (durationUnit === 'months') {
+                expiryDate.setMonth(expiryDate.getMonth() + durationValue);
+            } else {
+                return null;
+            }
+            return expiryDate.getTime();
+        }
+
+        // Function to log actions to history
+        async function logAction(actionType, details) {
             try {
-                document.execCommand('copy');
-            } catch (err) {
-                console.error('Fallback copy failed: ', err);
-            } finally {
-                document.body.removeChild(textarea);
+                await push(historyRef, {
+                    timestamp: new Date().toISOString(),
+                    action: actionType,
+                    details: details
+                });
+            } catch (error) {
+                console.error("Error logging action to history:", error);
             }
         }
 
-        // Load keys table for management
-        function loadKeysTable(searchTerm = '', statusFilter = 'all') {
-            onValue(accessKeysRef, (snapshot) => {
-                const keysData = snapshot.val();
-                keysTableBody.innerHTML = '';
-                
-                if (!keysData) {
-                    noKeysMessage.style.display = 'block';
+        // Universal Confirmation/Action Wrapper
+        window.confirmAction = function (type, title, message, callback) {
+            openCustomModal(type, title, message, callback);
+        }
+
+        // --- Access Key Management Functions ---
+
+        window.createKey = async function () {
+            const key = document.getElementById('key').value.trim();
+            const deviceId = document.getElementById('create_deviceId').value.trim() || null;
+            const durationValue = parseInt(document.getElementById('durationValue').value);
+            const durationUnit = document.getElementById('durationUnit').value;
+
+            if (!key || !durationValue) {
+                openCustomModal('error', 'Input Error', "Please fill in 'Key' and 'Duration Value'.");
+                return;
+            }
+
+            try {
+                const snapshot = await get(child(accessKeysRef, key));
+                if (snapshot.exists()) {
+                    openCustomModal('info', 'Creation Failed', `Access key "${key}" already exists. Please choose a different key.`);
                     return;
                 }
-                
-                noKeysMessage.style.display = 'none';
-                let hasResults = false;
-                
-                Object.entries(keysData).forEach(([key, keyData]) => {
-                    // Apply filters
-                    const isActive = keyData.active === true;
-                    const isExpired = keyData.expiry < Date.now();
-                    
-                    let shouldShow = true;
-                    
-                    // Apply search filter
-                    if (searchTerm) {
-                        const searchLower = searchTerm.toLowerCase();
-                        const keyMatch = key.toLowerCase().includes(searchLower);
-                        const deviceMatch = keyData.deviceId && keyData.deviceId.toLowerCase().includes(searchLower);
-                        
-                        if (!keyMatch && !deviceMatch) {
-                            shouldShow = false;
-                        }
-                    }
-                    
-                    // Apply status filter
-                    if (statusFilter !== 'all') {
-                        if (statusFilter === 'active' && (!isActive || isExpired)) {
-                            shouldShow = false;
-                        } else if (statusFilter === 'inactive' && isActive) {
-                            shouldShow = false;
-                        } else if (statusFilter === 'expired' && !isExpired) {
-                            shouldShow = false;
-                        }
-                    }
-                    
-                    if (shouldShow) {
-                        hasResults = true;
-                        const row = document.createElement('tr');
-                        
-                        // Format expiry date
-                        const expiryDate = new Date(keyData.expiry);
-                        const formattedDate = expiryDate.toLocaleDateString() + ' ' + expiryDate.toLocaleTimeString();
-                        
-                        // Determine status
-                        let statusText, statusClass;
-                        if (!isActive) {
-                            statusText = 'Disabled';
-                            statusClass = 'status-inactive';
-                        } else if (isExpired) {
-                            statusText = 'Expired';
-                            statusClass = 'status-expired';
-                        } else {
-                            statusText = 'Active';
-                            statusClass = 'status-active';
-                        }
-                        
-                        row.innerHTML = `
-                            <td>${key}</td>
-                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                            <td>${formattedDate}</td>
-                            <td>${keyData.deviceId || 'N/A'} ${keyData.maxDevices ? `(Max: ${keyData.maxDevices})` : ''}</td>
-                            <td>
-                                ${isActive ? 
-                                    `<button class="button danger disable-btn" data-key="${key}">Disable</button>` : 
-                                    `<button class="button secondary enable-btn" data-key="${key}">Enable</button>`
-                                }
-                                <button class="button secondary copy-btn" data-key="${key}">Copy</button>
-                            </td>
-                        `;
-                        
-                        keysTableBody.appendChild(row);
-                    }
-                });
-                
-                if (!hasResults) {
-                    noKeysMessage.style.display = 'block';
-                }
-                
-                // Add event listeners to buttons
-                document.querySelectorAll('.disable-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const key = e.target.getAttribute('data-key');
-                        disableKey(key);
-                    });
-                });
-                
-                document.querySelectorAll('.enable-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const key = e.target.getAttribute('data-key');
-                        enableKey(key);
-                    });
-                });
-                
-                document.querySelectorAll('.copy-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const key = e.target.getAttribute('data-key');
-                        copyToClipboard(key);
-                        showMessage('Key copied to clipboard!');
-                    });
-                });
-            });
-        }
 
-        // Disable a key
-        function disableKey(key) {
-            update(ref(db, `accessKeys/${key}`), { active: false })
-                .then(() => {
-                    showMessage(`Key ${key} has been disabled.`);
-                    addToHistory('disabled', key);
-                    loadKeysTable(); // Refresh the table
-                })
-                .catch(error => {
-                    console.error("Error disabling key:", error);
-                    showMessage('Error disabling key.', false);
-                });
-        }
+                const expiry = calculateExpiry(durationValue, durationUnit);
 
-        // Enable a key
-        function enableKey(key) {
-            update(ref(db, `accessKeys/${key}`), { active: true })
-                .then(() => {
-                    showMessage(`Key ${key} has been enabled.`);
-                    addToHistory('enabled', key);
-                    loadKeysTable(); // Refresh the table
-                })
-                .catch(error => {
-                    console.error("Error enabling key:", error);
-                    showMessage('Error enabling key.', false);
+                await set(child(accessKeysRef, key), {
+                    expiry: expiry,
+                    deviceId: deviceId,
+                    active: true,
+                    frozen: false
                 });
-        }
 
-        // Load history table
-        function loadHistoryTable(searchTerm = '', activityFilter = 'all') {
-            onValue(historyRef, (snapshot) => {
-                const historyData = snapshot.val();
-                historyTableBody.innerHTML = '';
-                
-                if (!historyData) {
-                    noHistoryMessage.style.display = 'block';
+                document.getElementById('key').value = "";
+                document.getElementById('create_deviceId').value = "";
+                document.getElementById('durationValue').value = "1";
+                document.getElementById('durationUnit').value = "days";
+                openCustomModal('success', 'Key Created', `Access key "${key}" created successfully!`);
+                renderAccessKeys();
+                await logAction('Access Key Created', { key: key, deviceId: deviceId, durationValue: durationValue, durationUnit: durationUnit, expiry: new Date(expiry).toISOString(), active: true });
+            } catch (error) {
+                console.error("Error creating key:", error);
+                openCustomModal('error', 'Creation Failed', 'Failed to create key: ' + error.message);
+            }
+        };
+
+        window.generateRandomKey = function () {
+            const part = Math.random().toString(36).substring(2, 8).toUpperCase();
+            document.getElementById('key').value = "LICUIS-" + part;
+        };
+
+        window.renderAccessKeys = function () {
+            const query = document.getElementById('search').value.toLowerCase();
+            get(accessKeysRef).then(snapshot => {
+                const container = document.getElementById('keys');
+                const keyCount = document.getElementById('keyCount');
+                container.innerHTML = '';
+                let total = 0;
+                if (!snapshot.exists() || Object.keys(snapshot.val()).length === 0) {
+                    container.innerHTML = '<div class="text-center text-gray-500 py-4">No access keys found.</div>';
+                    keyCount.innerText = `TOTAL KEYS: 0`;
                     return;
                 }
-                
-                noHistoryMessage.style.display = 'none';
-                let hasResults = false;
-                
-                // Convert to array and sort by timestamp (newest first)
-                const historyArray = Object.entries(historyData || {})
-                    .map(([id, item]) => ({ id, ...item }))
-                    .sort((a, b) => b.timestamp - a.timestamp);
-                
-                historyArray.forEach(item => {
-                    // Apply filters
-                    let shouldShow = true;
-                    
-                    // Apply search filter
-                    if (searchTerm) {
-                        const searchLower = searchTerm.toLowerCase();
-                        const keyMatch = item.key.toLowerCase().includes(searchLower);
-                        const activityMatch = item.activity.toLowerCase().includes(searchLower);
-                        
-                        if (!keyMatch && !activityMatch) {
-                            shouldShow = false;
-                        }
+                snapshot.forEach(childSnapshot => {
+                    const k = childSnapshot.key;
+                    const data = childSnapshot.val();
+                    if (!k.toLowerCase().includes(query)) return;
+
+                    const now = Date.now();
+                    const expired = data.expiry < now;
+                    const timeLeft = expired ? 'EXPIRED' : formatTimeLeft(data.expiry - now);
+                    const isActive = data.active !== false;
+                    const isFrozen = data.frozen === true;
+
+                    const deviceIdText = data.deviceId ? data.deviceId : 'UNBOUND';
+                    const deviceStatusClass = data.deviceId ? 'device-bound' : 'device-unbound';
+
+                    let statusClass, statusText;
+                    if (isFrozen) {
+                        statusClass = 'status-frozen';
+                        statusText = 'FROZEN';
+                    } else if (isActive) {
+                        statusClass = 'status-active';
+                        statusText = 'ACTIVE';
+                    } else {
+                        statusClass = 'status-inactive';
+                        statusText = 'INACTIVE';
                     }
-                    
-                    // Apply activity filter
-                    if (activityFilter !== 'all' && item.activity !== activityFilter) {
-                        shouldShow = false;
-                    }
-                    
-                    if (shouldShow) {
-                        hasResults = true;
-                        const row = document.createElement('tr');
-                        
-                        // Format timestamp
-                        const date = new Date(item.timestamp);
-                        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                        
-                        // Format activity text
-                        let activityText = item.activity.charAt(0).toUpperCase() + item.activity.slice(1);
-                        
-                        // Format details
-                        let detailsText = '';
-                        if (item.activity === 'created' && item.details) {
-                            detailsText = `Duration: ${item.details.duration} days`;
-                            if (item.details.deviceId) {
-                                detailsText += `, Device: ${item.details.deviceId}`;
-                            }
-                            if (item.details.maxDevices) {
-                                detailsText += `, Max Devices: ${item.details.maxDevices}`;
-                            }
-                        }
-                        
-                        row.innerHTML = `
-                            <td>${formattedDate}</td>
-                            <td>${activityText}</td>
-                            <td>${item.key}</td>
-                            <td>${detailsText}</td>
-                        `;
-                        
-                        historyTableBody.appendChild(row);
-                    }
+
+                    total++;
+                    container.innerHTML += `
+                        <div class="key-box space-y-2">
+                            <div class="flex items-center justify-between flex-wrap">
+                                <b class="text-lg text-gray-900">${k}</b>
+                                <div class="flex space-x-2 mt-2 md:mt-0">
+                                    <button onclick="editAccessKey('${k}', '${data.deviceId || ''}')"
+                                        class="text-blue-600 hover:text-blue-900" title="Edit Key">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="confirmAction('confirm', '${isFrozen ? 'Unfreeze' : 'Freeze'} Key', 'Are you sure you want to ${isFrozen ? 'unfreeze' : 'freeze'} key \\'${k}\\'?', () => toggleAccessKeyFrozen('${k}', ${isFrozen}))"
+                                        class="text-yellow-600 hover:text-yellow-900" title="${isFrozen ? 'Unfreeze' : 'Freeze'} Key">
+                                        <i class="fas fa-snowflake"></i>
+                                    </button>
+                                    <button onclick="confirmAction('confirm', '${isActive ? 'Deactivate' : 'Activate'} Key', 'Are you sure you want to ${isActive ? 'deactivate' : 'activate'} key \\'${k}\\'?', () => toggleAccessKeyStatus('${k}', ${isActive}))"
+                                        class="${isActive ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'}" title="${isActive ? 'Deactivate' : 'Activate'} Key">
+                                        <i class="fas ${isActive ? 'fa-power-off' : 'fa-play-circle'}"></i>
+                                    </button>
+                                    <button onclick="confirmAction('confirm', 'Delete Key', 'Are you sure you want to delete key \\'${k}\\'? This action cannot be undone.', () => deleteKey('${k}'))"
+                                        class="text-red-500 hover:text-red-700" title="Delete Key">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <div>STATUS: <span class="${statusClass} font-semibold">${statusText}</span></div>
+                                <div>EXPIRES IN: <span class="${expired ? 'expired' : 'valid'} font-semibold">${timeLeft}</span></div>
+                            </div>
+                            <div class="text-sm">DEVICE: <span class="${deviceStatusClass} font-semibold">${deviceIdText}</span></div>
+                            <div><small class="text-gray-500">Last updated: ${new Date(data.expiry).toLocaleString()}</small></div>
+                        </div>
+                    `;
                 });
-                
-                if (!hasResults) {
-                    noHistoryMessage.style.display = 'block';
-                }
+                keyCount.innerText = `TOTAL KEYS: ${total}`;
+            }).catch(error => {
+                console.error("Error rendering access keys:", error);
+                openCustomModal('error', 'Key List Error', 'Failed to load access keys: ' + error.message);
             });
         }
 
-        // Set up event listeners for manage tab
-        searchButton.addEventListener('click', () => {
-            loadKeysTable(searchKeyInput.value.trim());
-        });
-        
-        searchKeyInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                loadKeysTable(searchKeyInput.value.trim());
+        window.deleteKey = async function (k) {
+            try {
+                await remove(child(accessKeysRef, k));
+                openCustomModal('success', 'Key Deleted', `Access key "${k}" deleted successfully.`);
+                renderAccessKeys();
+                await logAction('Access Key Deleted', { key: k });
+            } catch (error) {
+                console.error("Error deleting key:", error);
+                openCustomModal('error', 'Deletion Failed', 'Failed to delete key: ' + error.message);
+            }
+        };
+
+        const editAccessKeyModal = document.getElementById('editAccessKeyModal');
+        const editAccessKeyForm = document.getElementById('editAccessKeyForm');
+        const editKeyOriginalName = document.getElementById('edit_key_original_name');
+        const editKeyName = document.getElementById('edit_key_name');
+        const editKeyDeviceId = document.getElementById('edit_key_deviceId');
+        const editDurationValue = document.getElementById('edit_durationValue');
+        const editDurationUnit = document.getElementById('edit_durationUnit');
+
+        window.editAccessKey = function (keyName, deviceId) {
+            editKeyOriginalName.value = keyName;
+            editKeyName.value = keyName;
+            editKeyDeviceId.value = deviceId || '';
+            editDurationValue.value = 1;
+            editDurationUnit.value = 'days';
+
+            editAccessKeyModal.style.display = 'flex';
+        }
+
+        window.closeEditAccessKeyModal = function () {
+            editAccessKeyModal.style.display = 'none';
+            editAccessKeyForm.reset();
+        }
+
+        editAccessKeyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const originalKeyName = editKeyOriginalName.value;
+            const newDeviceId = editKeyDeviceId.value.trim() || null;
+            const newDurationValue = parseInt(editDurationValue.value);
+            const newDurationUnit = editDurationUnit.value;
+
+            if (!originalKeyName || !newDurationValue || !newDurationUnit) {
+                openCustomModal('error', 'Input Error', 'Please fill in all required fields for editing.');
+                return;
+            }
+
+            const currentKeySnapshot = await get(child(accessKeysRef, originalKeyName));
+            let currentExpiry = Date.now();
+            if (currentKeySnapshot.exists()) {
+                currentExpiry = currentKeySnapshot.val().expiry;
+            }
+
+            const newExpiry = calculateExpiry(newDurationValue, newDurationUnit, currentExpiry);
+
+            try {
+                const updates = {
+                    deviceId: newDeviceId,
+                    expiry: newExpiry
+                };
+
+                await update(child(accessKeysRef, originalKeyName), updates);
+                openCustomModal('success', 'Key Updated', `Access key "${originalKeyName}" updated successfully!`);
+                closeEditAccessKeyModal();
+                renderAccessKeys();
+                await logAction('Access Key Edited', { key: originalKeyName, updatedFields: updates });
+            } catch (error) {
+                console.error("Error updating access key:", error);
+                openCustomModal('error', 'Update Failed', 'Failed to update access key: ' + error.message);
             }
         });
-        
-        filterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                loadKeysTable(searchKeyInput.value.trim(), button.getAttribute('data-status'));
+
+        window.toggleAccessKeyStatus = async function (key, currentStatus) {
+            const newStatus = !currentStatus;
+            const actionText = newStatus ? 'activate' : 'deactivate';
+            try {
+                await update(child(accessKeysRef, key), { active: newStatus, frozen: false });
+                openCustomModal('success', 'Status Changed', `Access key "${key}" ${actionText}d successfully.`);
+                renderAccessKeys();
+                await logAction(`Access Key ${newStatus ? 'Activated' : 'Deactivated'}`, { key: key, newStatus: newStatus });
+            } catch (error) {
+                console.error("Error toggling access key status:", error);
+                openCustomModal('error', 'Status Change Failed', 'Failed to toggle access key status: ' + error.message);
+            }
+        };
+
+        window.toggleAccessKeyFrozen = async function (key, isFrozen) {
+            const newFrozenStatus = !isFrozen;
+            const actionText = newFrozenStatus ? 'frozen' : 'unfrozen';
+            try {
+                await update(child(accessKeysRef, key), { frozen: newFrozenStatus, active: !newFrozenStatus });
+                openCustomModal('success', 'Status Changed', `Access key "${key}" has been ${actionText} successfully.`);
+                renderAccessKeys();
+                await logAction(`Access Key ${newFrozenStatus ? 'Frozen' : 'Unfrozen'}`, { key: key, isFrozen: newFrozenStatus });
+            } catch (error) {
+                console.error("Error toggling access key frozen status:", error);
+                openCustomModal('error', 'Status Change Failed', 'Failed to toggle access key frozen status: ' + error.message);
+            }
+        };
+
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+        const body = document.body;
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            body.classList.toggle('sidebar-open');
+        }
+
+        sidebarToggle.addEventListener('click', toggleSidebar);
+        sidebarCloseBtn.addEventListener('click', toggleSidebar);
+
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const contentSections = document.querySelectorAll('.content-section');
+        const currentSectionTitle = document.getElementById('currentSectionTitle');
+
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetSectionId = link.dataset.section;
+
+                sidebarLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                contentSections.forEach(section => section.classList.add('hidden'));
+
+                document.getElementById(targetSectionId).classList.remove('hidden');
+
+                currentSectionTitle.textContent = link.textContent.trim();
+
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
             });
         });
 
-        // Set up event listeners for history tab
-        historySearchButton.addEventListener('click', () => {
-            loadHistoryTable(historySearchInput.value.trim());
-        });
-        
-        historySearchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                loadHistoryTable(historySearchInput.value.trim());
+        const maintenanceModeToggle = document.getElementById('maintenanceModeToggle');
+        const webOffToggle = document.getElementById('webOffToggle');
+        const redirectUrlInput = document.getElementById('redirectUrl');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const settingsMessage = document.getElementById('settingsMessage');
+
+        async function loadSettings() {
+            try {
+                const snapshot = await get(settingsRef);
+                if (snapshot.exists()) {
+                    const settings = snapshot.val();
+                    maintenanceModeToggle.checked = settings.maintenanceMode || false;
+                    webOffToggle.checked = settings.webOff || false;
+                    redirectUrlInput.value = settings.redirectUrl || '';
+                }
+            } catch (error) {
+                console.error("Error loading settings:", error);
+                settingsMessage.className = 'message text-red-500';
+                settingsMessage.textContent = 'Failed to load settings.';
+            }
+        }
+
+        saveSettingsBtn.addEventListener('click', async () => {
+            const settings = {
+                maintenanceMode: maintenanceModeToggle.checked,
+                webOff: webOffToggle.checked,
+                redirectUrl: redirectUrlInput.value.trim()
+            };
+
+            try {
+                await set(settingsRef, settings);
+                settingsMessage.className = 'message text-green-500';
+                settingsMessage.textContent = 'Settings saved successfully!';
+                await logAction('Web Settings Updated', { settings: settings });
+            } catch (error) {
+                console.error("Error saving settings:", error);
+                settingsMessage.className = 'message text-red-500';
+                settingsMessage.textContent = 'Failed to save settings: ' + error.message;
             }
         });
-        
-        historyFilterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                historyFilterButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                loadHistoryTable(historySearchInput.value.trim(), button.getAttribute('data-history'));
-            });
+
+        const historyListContainer = document.getElementById('historyListContainer');
+        const historySearchInput = document.getElementById('historySearch');
+
+        window.renderHistory = async function () {
+            historyListContainer.innerHTML = '';
+            const query = historySearchInput.value.toLowerCase();
+            try {
+                const snapshot = await get(historyRef);
+                if (!snapshot.exists() || Object.keys(snapshot.val()).length === 0) {
+                    historyListContainer.innerHTML = '<div class="text-center text-gray-500 py-4 col-span-full">No history entries found.</div>';
+                    return;
+                }
+                const historyEntries = [];
+                snapshot.forEach(childSnapshot => {
+                    historyEntries.push(childSnapshot.val());
+                });
+
+                historyEntries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+                historyEntries.forEach(entry => {
+                    const timestamp = new Date(entry.timestamp).toLocaleString();
+                    const action = entry.action;
+                    const details = JSON.stringify(entry.details, null, 2);
+
+                    if (action.toLowerCase().includes(query) || details.toLowerCase().includes(query)) {
+                        historyListContainer.innerHTML += `
+                            <div class="history-item-card space-y-2">
+                                <p class="text-sm"><span class="action-type">${action}</span></p>
+                                <pre class="text-xs text-gray-700 whitespace-pre-wrap">${details}</pre>
+                                <p class="timestamp text-xs text-gray-500">${timestamp}</p>
+                            </div>
+                        `;
+                    }
+                });
+
+                if (historyListContainer.innerHTML === '') {
+                    historyListContainer.innerHTML = '<div class="text-center text-gray-500 py-4 col-span-full">No matching history entries found.</div>';
+                }
+
+            } catch (error) {
+                console.error("Error rendering history:", error);
+                openCustomModal('error', 'History Error', 'Failed to load history: ' + error.message);
+            }
+        };
+
+        // Initial render calls
+        renderAccessKeys();
+        loadSettings();
+        renderHistory();
+
+        // Fix for setInterval, should not use onValue for this
+        // onValue(accessKeysRef, () => { renderAccessKeys() });
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                sidebarToggle.style.display = 'flex';
+            }
         });
 
-        // Initialize the page
-        loadKeysTable();
+        // This is not needed and can cause performance issues if not handled carefully
+        // setInterval(renderAccessKeys, 1000);
     </script>
 </body>
 </html>
